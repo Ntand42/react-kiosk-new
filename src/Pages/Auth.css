@@ -1,0 +1,78 @@
+.auth-container {
+  background-image: url('../assets/LoginBackground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-form {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+  
+  .auth-form h2 {
+    margin-bottom: 24px;
+    text-align: center;
+    color: #1d1c1a;
+  }
+  
+  .auth-form input,
+  .auth-form select {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  
+  .auth-form button {
+    background-color: #dfd5c4;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .auth-form button:hover {
+    background-color: #967E76;
+  }
+  
+  .auth-form p {
+    margin-top: 15px;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+  
+  .auth-link {
+    color: #967E76;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .auth-link:hover {
+    text-decoration: underline;
+  }
+  
+  .login-link {
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+    text-align: center;
+    display: block;
+    margin-top: 1rem;
+  }

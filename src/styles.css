@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  form input {
+    display: block;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    width: 100%;
+  }
+  
+  button {
+    padding: 0.5rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .product-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .product-grid > div {
+    background: white;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    width: 200px;
+    border-radius: 5px;
+  }
+  

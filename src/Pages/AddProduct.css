@@ -1,0 +1,89 @@
+.add-product-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url('../assets/LoginBackground2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+  
+  .add-product-container-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    background-color: #e48811;
+    color: white;
+  }
+
+.add-product-form {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+  
+  .add-product-form h2 {
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .add-product-form input,
+  .add-product-form textarea,
+  .add-product-form select {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+  
+  .add-product-form button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #c7af8b;
+    color: white;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .add-product-form button:hover {
+    background-color: #967E76;
+  }
+  
+  .error-message {
+    color: #dc2626;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .inactive {
+    font-weight: bold;
+    color: #a94442; 
+  }
+
+  .edit-button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #dfd5c4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .edit-button:hover {
+    background-color: #298afa;
+  
+  }
