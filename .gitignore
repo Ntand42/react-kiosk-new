@@ -21,3 +21,20 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# dotnet
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# local databases
+*.db
+*.db-shm
+*.db-wal
+
+# uploads
+/YoKioskApi/wwwroot/uploads/*
+!/YoKioskApi/wwwroot/uploads/.gitkeep

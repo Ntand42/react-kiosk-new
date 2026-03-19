@@ -1,0 +1,6 @@
+@YoKioskApi_HostAddress = http://localhost:5053
+
+GET {{YoKioskApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
