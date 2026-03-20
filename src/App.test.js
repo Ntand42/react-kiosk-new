@@ -1,13 +1,16 @@
 import { render, screen } from '@testing-library/react';
-import App from './App';
+import Register from './Pages/Register.jsx';
 
-import Register from "./Pages/Register";
+jest.mock(
+  'react-router-dom',
+  () => ({
+    useNavigate: () => () => {},
+    Link: ({ children }) => <a href="/">{children}</a>
+  }),
+  { virtual: true }
+);
 
-<Route path="/register" element={<Register />} />
-
-
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+test('renders register form', () => {
+  render(<Register />);
+  expect(screen.getByRole('heading', { name: /register/i })).toBeInTheDocument();
 });

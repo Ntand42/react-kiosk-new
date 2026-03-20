@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoKioskApi", "YoKioskApi\YoKioskApi.csproj", "{707F7792-959A-1981-F782-C96B3BD7FA99}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{707F7792-959A-1981-F782-C96B3BD7FA99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{707F7792-959A-1981-F782-C96B3BD7FA99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{707F7792-959A-1981-F782-C96B3BD7FA99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{707F7792-959A-1981-F782-C96B3BD7FA99}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1B32F83F-C75B-41FF-8900-A497565CD53F}
+	EndGlobalSection
+EndGlobal
