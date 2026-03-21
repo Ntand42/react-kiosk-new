@@ -122,7 +122,7 @@ const Home = () => {
   
   const navigate = useNavigate();
 
-  const role = localStorage.getItem("role");
+  const roleId = localStorage.getItem("roleId");
   const usersId = localStorage.getItem("userId");
 
   const categoryImages = {
@@ -163,7 +163,9 @@ const Home = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("roleId");
     localStorage.removeItem("username");
+    localStorage.removeItem("userId");
     navigate("/login");
   };
 
@@ -404,7 +406,9 @@ const clearCart = () => {
   }, [usersId]);
 
  const filteredProducts = products
-  .filter((product) => (role === "2" ? true : product.isActive))
+  .filter((product) =>
+    roleId === "2" ? true : product.isActive && (product.quantity ?? 0) > 0
+  )
   .filter((product) =>
     selectedCategoryId ? product.categoryId === selectedCategoryId : true
   )
@@ -420,7 +424,7 @@ const clearCart = () => {
     <nav className="navbar">
       <img src={YoKioskLogo} alt="YoKiosk Logo" className="logo-image" />
       <div className="nav-links">
-        {role === "2" && (
+        {roleId === "2" && (
           <>
             <button onClick={() => navigate("/addProduct")}>Product Management</button>
             <button onClick={() => navigate("/usermanagement")}>User Management</button>
@@ -565,12 +569,12 @@ const clearCart = () => {
         <p className="description">{product.description}</p>
         <p className="quantity">Quantity: {product.quantity}</p>
         <p className="inactive">
-          Status: {product.isActive ? "Active" : "Inactive"}
+          Status: {product.isActive && (product.quantity ?? 0) > 0 ? "Active" : "InActive"}
           <p className="price">R {parseFloat(product.price).toFixed(2)}</p>
         </p>
 
         <div className="button-group">
-          {role === "2" && product.productsId && (
+          {roleId === "2" && product.productsId && (
             <button
               className="edit-button-small"
               onClick={() => navigate(`/edit-product/${product.productsId}`)}

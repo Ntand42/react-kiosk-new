@@ -9,8 +9,12 @@ function UserManagement() {
   const [editingUserId, setEditingUserId] = useState(null);
   const [editFormData, setEditFormData] = useState({ userName: "", roleId: "" });
   const navigate = useNavigate();
+  const roleId = localStorage.getItem("roleId");
+  const isSuperUser = roleId === "2";
 
   useEffect(() => {
+    if (!isSuperUser) return;
+
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -34,7 +38,11 @@ function UserManagement() {
     };
 
     fetchUsers();
-  }, []);
+  }, [isSuperUser]);
+
+  if (!isSuperUser) {
+    return <p className="text-center text-red-600">Unauthorized access</p>;
+  }
 
   const fundUser = async (userId) => {
     if (!amount) {

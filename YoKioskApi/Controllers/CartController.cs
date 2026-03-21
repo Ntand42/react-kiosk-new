@@ -48,6 +48,11 @@ public sealed class CartController : ControllerBase
             return BadRequest(new { message = "Product is inactive." });
         }
 
+        if (product.Quantity < request.Quantity)
+        {
+            return BadRequest(new { message = "Insufficient stock for this product." });
+        }
+
         var existing = await _db.CartItems.FirstOrDefaultAsync(c =>
             c.UsersId == request.UsersId && c.ProductsId == request.ProductsId
         );
@@ -186,6 +191,11 @@ public sealed class CartController : ControllerBase
         {
             var product = products.First(p => p.ProductsId == item.ProductsId);
             product.Quantity -= item.Quantity;
+            if (product.Quantity <= 0)
+            {
+                product.Quantity = 0;
+                product.IsActive = false;
+            }
         }
 
         var order = new Order

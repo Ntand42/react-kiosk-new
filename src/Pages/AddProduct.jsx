@@ -4,7 +4,7 @@ import './AddProduct.css';
 
 const AddProduct = () => {
   const navigate = useNavigate();
-  const role = localStorage.getItem("role");
+  const roleId = localStorage.getItem("roleId");
   const [categories, setCategories] = useState([]);
   const [product, setProduct] = useState({
     productName: "",
@@ -80,11 +80,13 @@ if (!product.productName || !product.description || !product.price || product.pr
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("roleId");
     localStorage.removeItem("username");
+    localStorage.removeItem("userId");
     navigate("/login");
   };
 
-  if (role !== "2") {
+  if (roleId !== "2") {
     return <p className="text-center text-red-600">Unauthorized access</p>;
   }
 

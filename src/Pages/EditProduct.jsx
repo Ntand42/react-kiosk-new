@@ -5,7 +5,7 @@ import './AddProduct.css';
 const EditProduct = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const role = localStorage.getItem("role");
+  const roleId = localStorage.getItem("roleId");
 
   const [categories, setCategories] = useState([]);
   const [product, setProduct] = useState({
@@ -102,7 +102,7 @@ const EditProduct = () => {
     }
   };
 
-  if (role !== "2") {
+  if (roleId !== "2") {
     return <p className="text-center text-red-600">Unauthorized access</p>;
   }
 

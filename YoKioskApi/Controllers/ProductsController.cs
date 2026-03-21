@@ -50,7 +50,7 @@ public sealed class ProductsController : ControllerBase
         var query = _db.Products.AsQueryable();
         if (!includeInactive)
         {
-            query = query.Where(p => p.IsActive);
+            query = query.Where(p => p.IsActive && p.Quantity > 0);
         }
 
         var products = await query.OrderByDescending(p => p.DateCreated).ToListAsync();
@@ -131,6 +131,7 @@ public sealed class ProductsController : ControllerBase
         }
 
         var imagePath = await SaveUpload(request.Image);
+        var isActive = (request.IsActive ?? true) && request.Quantity > 0;
         var created = new Product
         {
             ProductName = request.ProductName,
@@ -139,7 +140,7 @@ public sealed class ProductsController : ControllerBase
             Quantity = request.Quantity,
             CategoryId = request.CategoryId,
             DateCreated = request.DateCreated?.ToUniversalTime() ?? DateTime.UtcNow,
-            IsActive = request.IsActive ?? true,
+            IsActive = isActive,
             Image = imagePath
         };
 
@@ -215,6 +216,11 @@ public sealed class ProductsController : ControllerBase
         if (request.Image is not null && request.Image.Length > 0)
         {
             existing.Image = await SaveUpload(request.Image);
+        }
+
+        if (existing.Quantity <= 0)
+        {
+            existing.IsActive = false;
         }
 
         await _db.SaveChangesAsync();
@@ -308,6 +314,11 @@ public sealed class ProductsController : ControllerBase
             isActive = parsedIsActive;
         }
 
+        if (quantity <= 0)
+        {
+            isActive = false;
+        }
+
         var created = new Product
         {
             ProductName = productName,
@@ -383,6 +394,11 @@ public sealed class ProductsController : ControllerBase
         else if (!string.IsNullOrWhiteSpace(imageStr))
         {
             existing.Image = imageStr;
+        }
+
+        if (existing.Quantity <= 0)
+        {
+            existing.IsActive = false;
         }
 
         await _db.SaveChangesAsync();
