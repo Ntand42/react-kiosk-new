@@ -78,7 +78,7 @@ public sealed class ProductsController : ControllerBase
         return await GetProduct(id);
     }
 
-    [Authorize]
+    [Authorize(Roles = "SuperUser")]
     [HttpPost("CreateProduct")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [RequestSizeLimit(25_000_000)]
@@ -88,7 +88,7 @@ public sealed class ProductsController : ControllerBase
         return await CreateFromForm(form);
     }
 
-    [Authorize]
+    [Authorize(Roles = "SuperUser")]
     [HttpPost]
     [RequestSizeLimit(25_000_000)]
     [Consumes("multipart/form-data")]

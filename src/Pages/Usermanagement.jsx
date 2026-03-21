@@ -15,7 +15,7 @@ function UserManagement() {
       try {
         const token = localStorage.getItem("token");
 
-        const response = await fetch("https://localhost:7271/api/Users", {
+        const response = await fetch("http://localhost:7270/api/Users", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -45,7 +45,7 @@ function UserManagement() {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch("https://localhost:7271/api/Account/FundUserAccount", {
+      const response = await fetch("http://localhost:7270/api/Account/FundUserAccount", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -78,7 +78,7 @@ function UserManagement() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`https://localhost:7271/api/Users/${userId}`, {
+      const res = await fetch(`http://localhost:7270/api/Users/${userId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -110,7 +110,7 @@ function UserManagement() {
 
     console.log("Sending update payload:", payload); // <- Debug
 
-    const res = await fetch(`https://localhost:7271/api/Users/${userId}`, {
+    const res = await fetch(`http://localhost:7270/api/Users/${userId}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -25,12 +25,12 @@ const EditProduct = () => {
 
   // Fetch categories and product data
   useEffect(() => {
-    fetch("https://localhost:7271/api/Category")
+    fetch("http://localhost:7270/api/Category")
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(err => console.error("Category fetch failed", err));
 
-    fetch(`https://localhost:7271/api/Products/SearchProduct?id=${id}`)
+    fetch(`http://localhost:7270/api/Products/SearchProduct?id=${id}`)
       .then(res => res.json())
       .then(data => {
         setProduct({
@@ -81,7 +81,7 @@ const EditProduct = () => {
     }
 
     try {
-      const response = await fetch(`https://localhost:7271/api/Products/UpdateProduct?id=${id}`, {
+      const response = await fetch(`http://localhost:7270/api/Products/UpdateProduct?id=${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -179,7 +179,7 @@ return (
           <div className="mb-4">
             <p className="text-sm text-gray-600">Current Image:</p>
                 <img
-          src={`https://localhost:7271/${product.image}`}
+          src={`http://localhost:7270/${product.image}`}
           alt={product.productName}
           className="product-image"
         />

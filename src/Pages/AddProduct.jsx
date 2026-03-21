@@ -19,7 +19,7 @@ const AddProduct = () => {
 
   useEffect(() => {
     // Fetch categories if necessary
-    fetch("https://localhost:7271/api/Category")
+    fetch("http://localhost:7270/api/Category")
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(err => console.error("Category fetch failed", err));
@@ -54,7 +54,7 @@ if (!product.productName || !product.description || !product.price || product.pr
     formData.append("dateCreated", product.dateCreated);
     formData.append("image", image);
    
-    const response = await fetch("https://localhost:7271/api/Products/CreateProduct", {
+    const response = await fetch("http://localhost:7270/api/Products/CreateProduct", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,

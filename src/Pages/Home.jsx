@@ -68,7 +68,7 @@ const CartModal = ({ show, onClose, cartItems, onQuantityChange, onCheckout, onC
               {cartItems.map((item, index) => (
                 <li key={index} className="cart-item">
                   <img
-                    src={`https://localhost:7271/${item.image}`}
+                    src={`http://localhost:7270/${item.image}`}
                     alt={item.productName}
                     className="cart-image"
                   />
@@ -141,7 +141,7 @@ const Home = () => {
 
   
   try {
-    const res = await fetch(`https://localhost:7271/api/Order/User/${userId}`, {
+    const res = await fetch(`http://localhost:7270/api/Order/User/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -173,14 +173,14 @@ const Home = () => {
       return;
     }
 
-    fetch("https://localhost:7271/api/Account/Fund", {
+    fetch("http://localhost:7270/api/Account/Fund", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ usersId: parseInt(usersId), amount }),
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fund account");
-        return fetch(`https://localhost:7271/api/Account/Balance/${usersId}`);
+        return fetch(`http://localhost:7270/api/Account/Balance/${usersId}`);
       })
       .then((res) => res.json())
       .then((data) => {
@@ -229,7 +229,7 @@ const Home = () => {
       quantity,
     };
 
-    fetch("https://localhost:7271/api/Cart/add", {
+    fetch("http://localhost:7270/api/Cart/add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -301,7 +301,7 @@ const handleQuantityChange = (productId, delta) => {
 
   console.log("Sending checkout payload:", order);
 
-  fetch("https://localhost:7271/api/Cart/checkout", {
+  fetch("http://localhost:7270/api/Cart/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(order),
@@ -349,7 +349,7 @@ const clearCart = () => {
     return;
   }
 
-  fetch(`https://localhost:7271/api/Cart/Clear?userId=${usersId}`, {
+  fetch(`http://localhost:7270/api/Cart/Clear?userId=${usersId}`, {
     method: "DELETE",
     headers: {
       Accept: "*/*",
@@ -372,14 +372,14 @@ const clearCart = () => {
 
 
   useEffect(() => {
-    fetch("https://localhost:7271/api/Category")
+    fetch("http://localhost:7270/api/Category")
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((err) => console.error("Error fetching categories:", err));
   }, []);
 
   useEffect(() => {
-    fetch("https://localhost:7271/api/Products/ProductCollection")
+    fetch("http://localhost:7270/api/Products/ProductCollection")
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error("Error fetching products:", err));
@@ -387,7 +387,7 @@ const clearCart = () => {
 
   useEffect(() => {
     if (usersId) {
-      fetch(`https://localhost:7271/api/Account/Balance/${usersId}`)
+      fetch(`http://localhost:7270/api/Account/Balance/${usersId}`)
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch balance");
           return res.json();
@@ -557,7 +557,7 @@ const clearCart = () => {
     {filteredProducts.map((product) => (
       <div className="product-card" key={product.productId}>
         <img
-          src={`https://localhost:7271/${product.image}`}
+          src={`http://localhost:7270/${product.image}`}
           alt={product.productName}
           className="product-image"
         />
