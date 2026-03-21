@@ -26,13 +26,16 @@ public sealed class JwtTokenService
 
     public string CreateToken(User user)
     {
+        var roleName = user.RoleId == 2 ? "SuperUser" : "User";
+
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.UserName),
-            new(ClaimTypes.Role, user.RoleId.ToString()),
-            new("role", user.RoleId.ToString())
+            new(ClaimTypes.Role, roleName),
+            new("role", roleName),
+            new("roleId", user.RoleId.ToString())
         };
 
         var keyBytes = Encoding.UTF8.GetBytes(_options.Key);

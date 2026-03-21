@@ -65,6 +65,31 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var authorization = context.Request.Headers.Authorization.ToString();
+                if (string.IsNullOrWhiteSpace(authorization))
+                {
+                    return Task.CompletedTask;
+                }
+
+                var token = authorization.Trim();
+                if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    token = token.Substring("Bearer ".Length).Trim();
+                    if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        token = token.Substring("Bearer ".Length).Trim();
+                    }
+                }
+
+                context.Token = token;
+                return Task.CompletedTask;
+            }
+        };
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -84,21 +109,29 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "YoKioskApi", Version = "v1" });
 
-    var securityScheme = new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme."
-    };
+    c.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Paste the JWT token (with or without 'Bearer ')."
+        }
+    );
 
-    c.AddSecurityDefinition("Bearer", securityScheme);
     c.AddSecurityRequirement(
         new OpenApiSecurityRequirement
         {
-            { securityScheme, Array.Empty<string>() }
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                },
+                Array.Empty<string>()
+            }
         }
     );
 });

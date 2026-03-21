@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ public sealed class ProductsController : ControllerBase
     {
         public string ProductName { get; set; } = "";
         public string Description { get; set; } = "";
-        public decimal Price { get; set; }
+        public string Price { get; set; } = "";
         public int Quantity { get; set; }
         public int CategoryId { get; set; }
         public DateTime? DateCreated { get; set; }
@@ -29,7 +30,7 @@ public sealed class ProductsController : ControllerBase
     {
         public string? ProductName { get; set; }
         public string? Description { get; set; }
-        public decimal? Price { get; set; }
+        public string? Price { get; set; }
         public int? Quantity { get; set; }
         public int? CategoryId { get; set; }
         public DateTime? DateCreated { get; set; }
@@ -77,7 +78,7 @@ public sealed class ProductsController : ControllerBase
         return await GetProduct(id);
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize]
     [HttpPost("CreateProduct")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [RequestSizeLimit(25_000_000)]
@@ -87,7 +88,7 @@ public sealed class ProductsController : ControllerBase
         return await CreateFromForm(form);
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize]
     [HttpPost]
     [RequestSizeLimit(25_000_000)]
     [Consumes("multipart/form-data")]
@@ -103,7 +104,7 @@ public sealed class ProductsController : ControllerBase
             };
         }
 
-        if (request.Price <= 0)
+        if (!TryParseDecimal(request.Price, out var price) || price <= 0)
         {
             return new ContentResult { Content = "Invalid price.", ContentType = "text/plain", StatusCode = 400 };
         }
@@ -134,7 +135,7 @@ public sealed class ProductsController : ControllerBase
         {
             ProductName = request.ProductName,
             Description = request.Description,
-            Price = request.Price,
+            Price = price,
             Quantity = request.Quantity,
             CategoryId = request.CategoryId,
             DateCreated = request.DateCreated?.ToUniversalTime() ?? DateTime.UtcNow,
@@ -148,7 +149,7 @@ public sealed class ProductsController : ControllerBase
         return Ok(new { message = "Product created successfully!", product = created });
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize(Roles = "SuperUser")]
     [HttpPut("UpdateProduct")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [RequestSizeLimit(25_000_000)]
@@ -158,7 +159,7 @@ public sealed class ProductsController : ControllerBase
         return await UpdateFromForm(id, form);
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize(Roles = "SuperUser")]
     [HttpPut("{id:int}")]
     [RequestSizeLimit(25_000_000)]
     [Consumes("multipart/form-data")]
@@ -180,9 +181,9 @@ public sealed class ProductsController : ControllerBase
             existing.Description = request.Description;
         }
 
-        if (request.Price is > 0)
+        if (request.Price is { Length: > 0 } priceStr && TryParseDecimal(priceStr, out var parsedPrice) && parsedPrice > 0)
         {
-            existing.Price = request.Price.Value;
+            existing.Price = parsedPrice;
         }
 
         if (request.Quantity is >= 0)
@@ -220,14 +221,14 @@ public sealed class ProductsController : ControllerBase
         return Ok(new { message = "Product updated successfully!", product = existing });
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize(Roles = "SuperUser")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete([FromRoute] int id)
     {
         return await SoftDeleteProduct(id);
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize(Roles = "SuperUser")]
     [HttpDelete("DeleteProduct")]
     [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> DeleteProduct([FromQuery] int id)
@@ -254,7 +255,7 @@ public sealed class ProductsController : ControllerBase
             };
         }
 
-        if (!decimal.TryParse(priceStr, out var price) || price <= 0)
+        if (!TryParseDecimal(priceStr, out var price) || price <= 0)
         {
             return new ContentResult { Content = "Invalid price.", ContentType = "text/plain", StatusCode = 400 };
         }
@@ -336,7 +337,7 @@ public sealed class ProductsController : ControllerBase
         existing.ProductName = form["productName"].ToString() is { Length: > 0 } pn ? pn : existing.ProductName;
         existing.Description = form["description"].ToString() is { Length: > 0 } d ? d : existing.Description;
 
-        if (decimal.TryParse(form["price"].ToString(), out var price) && price > 0)
+        if (TryParseDecimal(form["price"].ToString(), out var price) && price > 0)
         {
             existing.Price = price;
         }
@@ -386,6 +387,22 @@ public sealed class ProductsController : ControllerBase
 
         await _db.SaveChangesAsync();
         return Ok(new { message = "Product updated successfully!", product = existing });
+    }
+
+    private static bool TryParseDecimal(string value, out decimal parsed)
+    {
+        if (decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed))
+        {
+            return true;
+        }
+
+        if (decimal.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out parsed))
+        {
+            return true;
+        }
+
+        var normalized = value.Replace(',', '.');
+        return decimal.TryParse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed);
     }
 
     private async Task<IActionResult> SoftDeleteProduct(int id)

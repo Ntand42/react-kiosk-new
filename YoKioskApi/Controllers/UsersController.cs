@@ -101,7 +101,7 @@ public sealed class UsersController : ControllerBase
         public bool IsActive { get; set; } = true;
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize(Roles = "SuperUser")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateUser([FromRoute] int id, [FromBody] UpdateUserRequest request)
     {
@@ -132,7 +132,7 @@ public sealed class UsersController : ControllerBase
         return Ok(new { message = "User updated successfully" });
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize(Roles = "SuperUser")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteUser([FromRoute] int id)
     {

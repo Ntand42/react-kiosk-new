@@ -44,6 +44,7 @@ public sealed class AuthController : ControllerBase
         }
 
         var token = _jwtTokenService.CreateToken(user);
-        return Ok(new { token, role = user.RoleId.ToString(), username = user.UserName, userId = user.Id });
+        var roleName = user.RoleId == 2 ? "SuperUser" : "User";
+        return Ok(new { token, role = roleName, roleId = user.RoleId, username = user.UserName, userId = user.Id });
     }
 }

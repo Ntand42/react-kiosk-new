@@ -60,7 +60,7 @@ public sealed class AccountController : ControllerBase
         public string Note { get; set; } = "";
     }
 
-    [Authorize(Roles = "2")]
+    [Authorize(Roles = "SuperUser")]
     [HttpPost("FundUserAccount")]
     public async Task<IActionResult> FundUserAccount([FromBody] FundUserAccountRequest request)
     {

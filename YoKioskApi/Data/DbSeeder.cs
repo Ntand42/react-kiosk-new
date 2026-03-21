@@ -48,9 +48,10 @@ public static class DbSeeder
             );
         }
 
-        if (!await db.Users.AnyAsync())
+        var adminUser = await db.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == "admin");
+        if (adminUser is null)
         {
-            var admin = new User
+            adminUser = new User
             {
                 UserName = "admin",
                 Email = "admin@yokiosk.local",
@@ -58,9 +59,23 @@ public static class DbSeeder
                 Balance = 1000,
                 IsActive = true
             };
-            admin.PasswordHash = passwordService.Hash(admin, "Admin123_");
+            adminUser.PasswordHash = passwordService.Hash(adminUser, "Admin123_");
+            db.Users.Add(adminUser);
+        }
+        else
+        {
+            adminUser.RoleId = 2;
+            adminUser.IsActive = true;
+            if (string.IsNullOrWhiteSpace(adminUser.PasswordHash))
+            {
+                adminUser.PasswordHash = passwordService.Hash(adminUser, "Admin123_");
+            }
+        }
 
-            var user = new User
+        var normalUser = await db.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == "user");
+        if (normalUser is null)
+        {
+            normalUser = new User
             {
                 UserName = "user",
                 Email = "user@yokiosk.local",
@@ -68,9 +83,8 @@ public static class DbSeeder
                 Balance = 250,
                 IsActive = true
             };
-            user.PasswordHash = passwordService.Hash(user, "User123_");
-
-            db.Users.AddRange(admin, user);
+            normalUser.PasswordHash = passwordService.Hash(normalUser, "User123_");
+            db.Users.Add(normalUser);
         }
 
         if (!await db.Products.AnyAsync())
