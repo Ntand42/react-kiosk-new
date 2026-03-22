@@ -756,3 +756,41 @@ input:checked + .slider:before {
 .fund-usermanagement-button:hover {
   background-color: #218838; /* Darker green on hover */
 }
+
+.confetti-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  border-radius: 2px;
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.12, 0.58, 0.2, 1);
+  animation-fill-mode: forwards;
+  will-change: transform, top, opacity;
+}
+
+@keyframes confetti-fall {
+  0% {
+    top: -12px;
+    transform: translateX(0px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    top: 110vh;
+    transform: translateX(var(--confetti-drift)) rotate(720deg);
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 import "./Product.css";
@@ -6,6 +6,72 @@ import './AddProduct.css';
 import YoKioskLogo from '../assets/YoKioskLogo.png'; // adjust path as needed
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
+const ConfettiOverlay = ({ show, runId }) => {
+  const pieces = useMemo(() => {
+    const mulberry32 = (seed) => {
+      let t = seed >>> 0;
+      return () => {
+        t += 0x6D2B79F5;
+        let r = Math.imul(t ^ (t >>> 15), 1 | t);
+        r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+        return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+      };
+    };
+
+    const rand = mulberry32(0xC0FFEE ^ (runId * 2654435761));
+    const colors = ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93", "#00bbf9", "#f15bb5"];
+    const count = 120;
+
+    return Array.from({ length: count }, (_, i) => {
+      const left = rand() * 100;
+      const delay = rand() * 0.25;
+      const duration = 1.8 + rand() * 1.2;
+      const rotate = (rand() * 360 - 180).toFixed(2);
+      const size = 6 + rand() * 8;
+      const drift = (rand() * 2 - 1) * 180;
+      const color = colors[Math.floor(rand() * colors.length)];
+      const opacity = 0.75 + rand() * 0.25;
+
+      return {
+        key: `${runId}-${i}`,
+        left: `${left.toFixed(2)}vw`,
+        delay: `${delay.toFixed(3)}s`,
+        duration: `${duration.toFixed(2)}s`,
+        rotate: `${rotate}deg`,
+        width: `${Math.max(4, size * 0.55).toFixed(2)}px`,
+        height: `${size.toFixed(2)}px`,
+        drift: `${drift.toFixed(2)}px`,
+        backgroundColor: color,
+        opacity: opacity.toFixed(2),
+      };
+    });
+  }, [runId]);
+
+  if (!show) return null;
+
+  return (
+    <div className="confetti-overlay" aria-hidden="true">
+      {pieces.map((p) => (
+        <span
+          key={p.key}
+          className="confetti-piece"
+          style={{
+            left: p.left,
+            width: p.width,
+            height: p.height,
+            backgroundColor: p.backgroundColor,
+            opacity: p.opacity,
+            animationDelay: p.delay,
+            animationDuration: p.duration,
+            transform: `translateX(0px) rotate(${p.rotate})`,
+            "--confetti-drift": p.drift,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 
 
@@ -119,6 +185,9 @@ const Home = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiRunId, setConfettiRunId] = useState(0);
+  const confettiTimeoutRef = useRef(null);
   
   const navigate = useNavigate();
 
@@ -167,6 +236,26 @@ const Home = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("userId");
     navigate("/login");
+  };
+
+  useEffect(() => {
+    return () => {
+      if (confettiTimeoutRef.current) {
+        clearTimeout(confettiTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const triggerConfetti = () => {
+    if (confettiTimeoutRef.current) {
+      clearTimeout(confettiTimeoutRef.current);
+    }
+
+    setConfettiRunId((v) => v + 1);
+    setShowConfetti(true);
+    confettiTimeoutRef.current = setTimeout(() => {
+      setShowConfetti(false);
+    }, 2500);
   };
 
   const handleFundAccount = (amount) => {
@@ -313,6 +402,7 @@ const handleQuantityChange = (productId, delta) => {
       return res.json();
     })
     .then(() => {
+      triggerConfetti();
       alert("Order placed successfully!");
       setCartItems([]);
       setCartCount(0);
@@ -421,6 +511,7 @@ const clearCart = () => {
 
   return (
   <div className="home-container">
+    <ConfettiOverlay show={showConfetti} runId={confettiRunId} />
     <nav className="navbar">
       <img src={YoKioskLogo} alt="YoKiosk Logo" className="logo-image" />
       <div className="nav-links">
