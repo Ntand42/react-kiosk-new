@@ -73,10 +73,43 @@ const ConfettiOverlay = ({ show, runId }) => {
   );
 };
 
+const formatShortDate = (isoDate) => {
+  if (!isoDate) return "";
+  const d = new Date(isoDate);
+  if (Number.isNaN(d.getTime())) return String(isoDate);
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
 
+const SparkBarChart = ({ points, valueKey, color, title }) => {
+  const values = Array.isArray(points) ? points.map((p) => Number(p?.[valueKey] ?? 0)) : [];
+  const max = Math.max(1, ...values);
+  const count = values.length || 1;
+
+  return (
+    <div className="chart-card">
+      <div className="chart-title">{title}</div>
+      <svg className="chart-svg" viewBox={`0 0 ${count} 100`} preserveAspectRatio="none" aria-hidden="true">
+        {values.map((v, i) => {
+          const h = (v / max) * 88;
+          const y = 96 - h;
+          return <rect key={i} x={i + 0.12} y={y} width={0.76} height={h} rx={0.18} fill={color} />;
+        })}
+        <rect x="0" y="96" width={count} height="1" fill="rgba(0,0,0,0.08)" />
+      </svg>
+      <div className="chart-footer">
+        <div className="chart-range">
+          {points?.[0]?.date ? formatShortDate(points[0].date) : "—"} –{" "}
+          {points?.[points.length - 1]?.date ? formatShortDate(points[points.length - 1].date) : "—"}
+        </div>
+        <div className="chart-max">Max: {max.toFixed(valueKey === "totalRevenue" ? 2 : 0)}</div>
+      </div>
+    </div>
+  );
+};
 
 const AccountModal = ({ show, onClose, onFund, currentBalance }) => {
   const [amount, setAmount] = useState("");
+
 
   const handleSubmit = () => {
     const numericAmount = parseFloat(amount);
@@ -185,6 +218,9 @@ const Home = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsError, setAnalyticsError] = useState("");
+  const [analyticsSeries, setAnalyticsSeries] = useState([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiRunId, setConfettiRunId] = useState(0);
   const confettiTimeoutRef = useRef(null);
@@ -200,6 +236,31 @@ const Home = () => {
     Fruits: "/images/fruits.jpg",
     Meal: "/images/meals.jpg",
     Salad: "/images/salad.jpg",
+  };
+
+  const fetchAnalytics = async () => {
+    try {
+      setAnalyticsError("");
+      const token = localStorage.getItem("token");
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const [summaryRes, byDayRes] = await Promise.all([
+        fetch("http://localhost:7270/api/Analytics/Summary", { headers }),
+        fetch("http://localhost:7270/api/Analytics/OrdersByDay?days=14", { headers }),
+      ]);
+
+      if (!summaryRes.ok || !byDayRes.ok) {
+        throw new Error("Failed to fetch analytics");
+      }
+
+      const [summary, byDay] = await Promise.all([summaryRes.json(), byDayRes.json()]);
+      setAnalytics(summary);
+      setAnalyticsSeries(Array.isArray(byDay) ? byDay : []);
+    } catch (err) {
+      setAnalytics(null);
+      setAnalyticsSeries([]);
+      setAnalyticsError(err?.message || "Failed to fetch analytics");
+    }
   };
 
   const fetchOrders = async () => {
@@ -476,11 +537,13 @@ const clearCart = () => {
   }, []);
 
   useEffect(() => {
+    if (roleId === "2") return;
+
     fetch("http://localhost:7270/api/Products/ProductCollection")
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error("Error fetching products:", err));
-  }, []);
+  }, [roleId]);
 
   useEffect(() => {
     if (usersId) {
@@ -499,6 +562,11 @@ const clearCart = () => {
         });
     }
   }, [usersId]);
+
+  useEffect(() => {
+    if (roleId !== "2") return;
+    fetchAnalytics();
+  }, [roleId]);
 
  const filteredProducts = products
   .filter((product) =>
@@ -523,6 +591,7 @@ const clearCart = () => {
         {roleId === "2" && (
           <>
             <button onClick={() => navigate("/addProduct")}>Product Management</button>
+            <button onClick={() => navigate("/check-products")}>Check Products</button>
             <button onClick={fetchOrders}>Order Management</button>
             <button onClick={() => navigate("/usermanagement")}>User Management</button>
           </>
@@ -622,77 +691,134 @@ const clearCart = () => {
     />
 
 
-      <div className="category-section">
-        <h2 className="section-title"> Ｃａｔｅｇｏｒｙ Ｐｒｏｄｕｃｔｓ </h2>
-        <div className="category-buttons">
-          {categories.map((category) => (
-            <button
-              key={category.categoryId}
-              onClick={() => setSelectedCategoryId(category.categoryId)}
-              className={`category-button ${selectedCategoryId === category.categoryId ? "active" : ""}`}
-            >
-              <img
-                src={categoryImages[category.categoryName]}
-                alt={category.categoryName}
-                className="category-icon"
+      {roleId === "2" ? (
+        <div className="dashboard-section">
+          <div className="dashboard-header">
+            <h2>Dashboard</h2>
+            <button onClick={fetchAnalytics} className="dashboard-refresh">
+              Refresh
+            </button>
+          </div>
+
+          {analyticsError && <p className="dashboard-error">{analyticsError}</p>}
+
+          <div className="dashboard-grid">
+            <div className="dashboard-card">
+              <div className="dashboard-label">Total products</div>
+              <div className="dashboard-value">
+                {analytics ? analytics.totalProducts : "—"}
+              </div>
+            </div>
+            <div className="dashboard-card">
+              <div className="dashboard-label">Total orders</div>
+              <div className="dashboard-value">
+                {analytics ? analytics.totalOrders : "—"}
+              </div>
+            </div>
+            <div className="dashboard-card">
+              <div className="dashboard-label">Total revenue</div>
+              <div className="dashboard-value">
+                {analytics
+                  ? `R ${Number(analytics.totalRevenue || 0).toFixed(2)}`
+                  : "—"}
+              </div>
+            </div>
+            <div className="dashboard-card">
+              <div className="dashboard-label">Active users</div>
+              <div className="dashboard-value">
+                {analytics ? analytics.activeUsers : "—"}
+              </div>
+            </div>
+          </div>
+
+          <div className="dashboard-charts">
+            <SparkBarChart
+              points={analyticsSeries}
+              valueKey="totalOrders"
+              color="#1982c4"
+              title="Orders (last 14 days)"
+            />
+            <SparkBarChart
+              points={analyticsSeries}
+              valueKey="totalRevenue"
+              color="#8ac926"
+              title="Revenue (last 14 days)"
+            />
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="category-section">
+            <h2 className="section-title"> Ｃａｔｅｇｏｒｙ Ｐｒｏｄｕｃｔｓ </h2>
+            <div className="category-buttons">
+              {categories.map((category) => (
+                <button
+                  key={category.categoryId}
+                  onClick={() => setSelectedCategoryId(category.categoryId)}
+                  className={`category-button ${selectedCategoryId === category.categoryId ? "active" : ""}`}
+                >
+                  <img
+                    src={categoryImages[category.categoryName]}
+                    alt={category.categoryName}
+                    className="category-icon"
+                  />
+                  {category.categoryName}
+                </button>
+              ))}
+              <button
+                onClick={() => setSelectedCategoryId(null)}
+                className={`category-button ${selectedCategoryId === null ? "active" : ""}`}
+              >
+                <img src="/images/All.jpg" alt="All" className="category-icon" />
+                All
+              </button>
+              <input
+                type="text"
+                placeholder="Search product..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-bar"
               />
-              {category.categoryName}
-            </button>
-          ))}
-          <button
-            onClick={() => setSelectedCategoryId(null)}
-            className={`category-button ${selectedCategoryId === null ? "active" : ""}`}
-          >
-            <img src="/images/All.jpg" alt="All" className="category-icon" />
-            All
-          </button>
-          <input
-         type="text"
-         placeholder="Search product..."
-         value={searchTerm}
-         onChange={(e) => setSearchTerm(e.target.value)}
-         className="search-bar"
-         />
-        </div>
-      </div>
+            </div>
+          </div>
 
-<div className="product-section">
-  <div className="product-grid">
-    {filteredProducts.map((product) => (
-      <div className="product-card" key={product.productId}>
-        <img
-          src={`http://localhost:7270/${product.image}`}
-          alt={product.productName}
-          className="product-image"
-        />
-        <h3>{product.productName}</h3>
-        <p className="description">{product.description}</p>
-        <p className="quantity">Quantity: {product.quantity}</p>
-        <p className="inactive">
-          Status: {product.isActive && (product.quantity ?? 0) > 0 ? "Active" : "InActive"}
-          <p className="price">R {parseFloat(product.price).toFixed(2)}</p>
-        </p>
+          <div className="product-section">
+            <div className="product-grid">
+              {filteredProducts.map((product) => (
+                <div
+                  className="product-card"
+                  key={product.productsId ?? product.productId}
+                >
+                  <img
+                    src={`http://localhost:7270/${product.image}`}
+                    alt={product.productName}
+                    className="product-image"
+                  />
+                  <h3>{product.productName}</h3>
+                  <p className="description">{product.description}</p>
+                  <p className="quantity">Quantity: {product.quantity}</p>
+                  <p className="inactive">
+                    Status:{" "}
+                    {product.isActive && (product.quantity ?? 0) > 0
+                      ? "Active"
+                      : "InActive"}
+                    <p className="price">R {parseFloat(product.price).toFixed(2)}</p>
+                  </p>
 
-        <div className="button-group">
-          {roleId === "2" && product.productsId && (
-            <button
-              className="edit-button-small"
-              onClick={() => navigate(`/edit-product/${product.productsId}`)}
-            >
-              ✏️ Edit
-            </button>
-          )}
-          <button
-            onClick={() => handleAddToCart(product)}
-            className="add-to-cart-btn"
-          >
-            <span role="img" aria-label="cart">🛒</span> Add to Cart
-          </button>
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
+                  <div className="button-group">
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className="add-to-cart-btn"
+                    >
+                      <span role="img" aria-label="cart">🛒</span> Add to Cart
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
 
     </div>

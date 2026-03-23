@@ -9,6 +9,7 @@ import AddProduct from "./Pages/AddProduct.jsx";
 import EditProduct from "./Pages/EditProduct.jsx"; 
 import Cart from "./Pages/Cart.jsx";
 import UserManagement from "./Pages/Usermanagement.jsx";
+import CheckProducts from "./Pages/CheckProducts.jsx";
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/edit-product/:id" element={<EditProduct />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/usermanagement" element={<UserManagement />} />
+        <Route path="/check-products" element={<CheckProducts />} />
         
   
       </Routes>

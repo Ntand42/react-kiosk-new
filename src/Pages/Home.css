@@ -794,3 +794,126 @@ input:checked + .slider:before {
     opacity: 0;
   }
 }
+
+.dashboard-section {
+  max-width: 1100px;
+  margin: 26px auto 0;
+  padding: 0 18px 18px;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.dashboard-refresh {
+  background: #1f2937;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.dashboard-refresh:hover {
+  background: #111827;
+}
+
+.dashboard-error {
+  color: #b91c1c;
+  font-weight: 700;
+  margin: 8px 0 14px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dashboard-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-label {
+  color: #6b7280;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.dashboard-value {
+  margin-top: 10px;
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #111827;
+}
+
+@media (max-width: 980px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.chart-title {
+  font-weight: 900;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+
+.chart-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  color: #6b7280;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 980px) {
+  .dashboard-charts {
+    grid-template-columns: 1fr;
+  }
+}
