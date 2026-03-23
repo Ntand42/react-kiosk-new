@@ -6,6 +6,7 @@ import './AddProduct.css';
 import YoKioskLogo from '../assets/YoKioskLogo.png'; // adjust path as needed
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { toast } from "react-toastify";
 
 const ConfettiOverlay = ({ show, runId }) => {
   const pieces = useMemo(() => {
@@ -223,7 +224,7 @@ const AccountModal = ({ show, onClose, onFund, currentBalance }) => {
       onFund(numericAmount);
       setAmount("");
     } else {
-      alert("Please enter a valid amount.");
+      toast.warning("Please enter a valid amount.");
     }
   };
 
@@ -418,7 +419,7 @@ const Home = () => {
     setShowOrders(true); // show modal after fetching
   } catch (err) {
     console.error("Error fetching orders:", err);
-    alert("Failed to load orders.");
+    toast.error("Failed to load orders.");
   }
 };
 
@@ -455,7 +456,7 @@ const Home = () => {
 
   const handleFundAccount = (amount) => {
     if (!usersId) {
-      alert("User not found.");
+      toast.error("User not found.");
       return;
     }
 
@@ -474,12 +475,12 @@ const Home = () => {
         if (isNaN(parsedBalance)) throw new Error("Invalid balance received");
 
         setWalletBalance(parsedBalance);
-        alert(`Account funded with R${amount.toFixed(2)}`);
+        toast.success(`Account funded with R${amount.toFixed(2)}`);
         setShowAccountModal(false);
       })
       .catch((err) => {
         console.error("Error funding account:", err);
-        alert("Failed to fund account.");
+        toast.error("Failed to fund account.");
       });
   };
 
@@ -488,12 +489,12 @@ const Home = () => {
     const quantity = 1;
 
     if (!usersId || isNaN(parseInt(usersId)) || !product?.productsId) {
-      alert("Invalid user or product.");
+      toast.error("Invalid user or product.");
       return;
     }
 
     if (product.quantity < quantity) {
-      alert("Product not available or insufficient quantity.");
+      toast.warning("Product not available or insufficient quantity.");
       return;
     }
 
@@ -530,11 +531,11 @@ const Home = () => {
       })
       .then((data) => {
         setCartCount((prevCount) => prevCount + 1);
-        alert(data.message || "Product added to cart!");
+        toast.success(data.message || "Product added to cart!");
       })
       .catch((error) => {
         console.error("Error adding to cart:", error);
-        alert(error.message);
+        toast.error(error.message || "Failed to add product to cart.");
       });
   };
 const handleQuantityChange = (productId, delta) => {
@@ -562,7 +563,7 @@ const handleQuantityChange = (productId, delta) => {
  const handleConfirmOrder = (method) => {
   const usersId = parseInt(localStorage.getItem("userId"));
   if (!usersId) {
-    alert("User not identified.");
+    toast.error("User not identified.");
     return;
   }
 
@@ -572,7 +573,7 @@ const handleQuantityChange = (productId, delta) => {
   );
 
   if (walletBalance < total) {
-    alert("Insufficient wallet balance.");
+    toast.error("Insufficient wallet balance.");
     return;
   }
 
@@ -598,7 +599,7 @@ const handleQuantityChange = (productId, delta) => {
     })
     .then(() => {
       triggerConfetti();
-      alert("Order placed successfully!");
+      toast.success("Order placed successfully!");
       setCartItems([]);
       setCartCount(0);
       setWalletBalance((prev) => prev - total);
@@ -606,19 +607,19 @@ const handleQuantityChange = (productId, delta) => {
     })
     .catch((err) => {
       console.error("Checkout error:", err);
-      alert("Failed to complete order.");
+      toast.error("Failed to complete order.");
     });
 };
 
 
  const handleCheckout = (method) => {
   if (cartItems.length === 0) {
-    alert("Cart is empty.");
+    toast.info("Cart is empty.");
     return;
   }
 
   if (method !== "pickup" && method !== "delivery") {
-    alert("Invalid delivery method.");
+    toast.error("Invalid delivery method.");
     return;
   }
 
@@ -649,11 +650,11 @@ const clearCart = () => {
       return res.text(); // <- Expecting plain text
     })
     .then((message) => {
-      alert(message); // Shows "Cart cleared successfully."
+      toast.success(message || "Cart cleared successfully.");
     })
     .catch((err) => {
       console.error("Error clearing cart:", err);
-      alert("Failed to clear cart.");
+      toast.error("Failed to clear cart.");
     });
 };
 

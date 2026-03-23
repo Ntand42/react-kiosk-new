@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import './Register.css';
+import { toast } from "react-toastify";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const Register = () => {
       });
 
       if (response.ok) {
-        alert("Registration successful!");
+        toast.success("Registration successful!");
         navigate("/login");
       } else {
         const message = await response.text();

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
+import { toast } from "react-toastify";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -33,7 +34,7 @@ function UserManagement() {
         setUsers(data);
       } catch (error) {
         console.error("Error fetching users:", error);
-        alert("Could not load users");
+        toast.error("Could not load users");
       }
     };
 
@@ -46,7 +47,7 @@ function UserManagement() {
 
   const fundUser = async (userId) => {
     if (!amount) {
-      alert("Please enter an amount.");
+      toast.warning("Please enter an amount.");
       return;
     }
 
@@ -70,12 +71,12 @@ function UserManagement() {
         throw new Error("Funding failed");
       }
 
-      alert("User funded successfully");
+      toast.success("User funded successfully");
       setAmount("");
       setSelectedUserId(null);
     } catch (error) {
       console.error("Funding error:", error);
-      alert("Failed to fund user");
+      toast.error("Failed to fund user");
     }
   };
 
@@ -95,11 +96,11 @@ function UserManagement() {
 
       if (!res.ok) throw new Error("Failed to delete user");
 
-      alert("User deleted successfully");
+      toast.success("User deleted successfully");
       setUsers(users.filter((user) => user.id !== userId));
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Could not delete user");
+      toast.error("Could not delete user");
     }
   };
 
@@ -132,13 +133,13 @@ function UserManagement() {
     }
 
     const data = await res.json();
-    alert(data.message || "User updated successfully");
+    toast.success(data.message || "User updated successfully");
 
     // Refresh or update user list here
     setEditingUserId(null);
   } catch (error) {
     console.error("Update error:", error);
-    alert("Could not update user");
+    toast.error("Could not update user");
   }
 };
 

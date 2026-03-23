@@ -10,6 +10,7 @@ import EditProduct from "./Pages/EditProduct.jsx";
 import Cart from "./Pages/Cart.jsx";
 import UserManagement from "./Pages/Usermanagement.jsx";
 import CheckProducts from "./Pages/CheckProducts.jsx";
+import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         
   
       </Routes>
+      <ToastContainer position="top-right" autoClose={2500} />
     </Router>
 
     

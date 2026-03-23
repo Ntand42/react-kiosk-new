@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import LoginBackground from "../assets/LoginBackground2.png"; 
 import "./Auth.css";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -31,14 +32,14 @@ const Login = () => {
         localStorage.setItem("userId", data.userId); 
 
 
-        alert('Login successful!');
+        toast.success("Login successful!");
         navigate('/home');
       } else {
-        alert('Login failed. Check your credentials.');
+        toast.error("Login failed. Check your credentials.");
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('An error occurred. Please try again.');
+      toast.error("An error occurred. Please try again.");
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import './AddProduct.css';
+import { toast } from "react-toastify";
 
 const EditProduct = () => {
   const navigate = useNavigate();
@@ -90,15 +91,17 @@ const EditProduct = () => {
       });
 
       if (response.ok) {
-        alert("Product updated successfully!");
+        toast.success("Product updated successfully!");
         navigate("/home");
       } else {
         const msg = await response.text();
         setError(msg || "Failed to update product.");
+        toast.error(msg || "Failed to update product.");
       }
     } catch (err) {
       console.error(err);
       setError("An error occurred.");
+      toast.error("An error occurred.");
     }
   };
 

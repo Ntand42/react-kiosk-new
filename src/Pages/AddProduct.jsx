@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import './AddProduct.css';
+import { toast } from "react-toastify";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const handleSubmit = async (e) => {
 
 if (!product.productName || !product.description || !product.price || product.price <= 0 || !product.categoryId || !product.quantity || !image) {
   setError("All fields are required and must be valid.");
+  toast.error("All fields are required and must be valid.");
   return;
 }
 
@@ -68,12 +70,13 @@ if (!product.productName || !product.description || !product.price || product.pr
     }
 
     const data = await response.json();
-    alert(data.message || "Product created successfully!");
+    toast.success(data.message || "Product created successfully!");
     navigate("/home");
 
   } catch (err) {
     console.error("Submission error:", err);
     setError(err.message || "An error occurred.");
+    toast.error(err.message || "An error occurred.");
   }
 };
 
