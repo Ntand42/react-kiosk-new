@@ -64,7 +64,7 @@ const CheckProducts = () => {
         <div className="nav-links">
           <button onClick={() => navigate("/home")}>Dashboard</button>
           <button onClick={() => navigate("/addProduct")}>Product Management</button>
-          <button onClick={() => navigate("/check-products")}>Check Products</button>
+          <button onClick={() => navigate("/check-products")}>Menu</button>
           <button onClick={() => navigate("/usermanagement")}>User Management</button>
           <button onClick={handleLogout}>Logout</button>
         </div>
@@ -146,4 +146,3 @@ const CheckProducts = () => {
 };
 
 export default CheckProducts;
-

@@ -107,6 +107,112 @@ const SparkBarChart = ({ points, valueKey, color, title }) => {
   );
 };
 
+const apiImageUrl = (image) => (image ? `http://localhost:7270/${image}` : "");
+
+const MiniBarChart = ({ title, points, valueKey, color, footerLeft }) => {
+  const values = Array.isArray(points) ? points.map((p) => Number(p?.[valueKey] ?? 0)) : [];
+  const max = Math.max(1, ...values);
+  const count = values.length || 1;
+
+  return (
+    <div className="chart-card">
+      <div className="chart-title">{title}</div>
+      <svg className="chart-svg chart-svg-compact" viewBox={`0 0 ${count} 100`} preserveAspectRatio="none" aria-hidden="true">
+        {values.map((v, i) => {
+          const h = (v / max) * 88;
+          const y = 96 - h;
+          return <rect key={i} x={i + 0.12} y={y} width={0.76} height={h} rx={0.18} fill={color} />;
+        })}
+        <rect x="0" y="96" width={count} height="1" fill="rgba(0,0,0,0.08)" />
+      </svg>
+      <div className="chart-footer">
+        <div className="chart-range">{footerLeft || "—"}</div>
+        <div className="chart-max">Max: {max.toFixed(0)}</div>
+      </div>
+    </div>
+  );
+};
+
+const PieChartCard = ({ title, rows }) => {
+  const safeRows = Array.isArray(rows) ? rows.filter((r) => Number(r?.value ?? 0) > 0) : [];
+  const total = safeRows.reduce((sum, r) => sum + Number(r.value), 0);
+  const colors = ["#1982c4", "#8ac926", "#ffca3a", "#ff595e", "#6a4c93", "#00bbf9", "#f15bb5", "#9ca3af"];
+
+  const toXY = (angleDeg, radius) => {
+    const a = ((angleDeg - 90) * Math.PI) / 180;
+    return { x: 50 + radius * Math.cos(a), y: 50 + radius * Math.sin(a) };
+  };
+
+  let startAngle = 0;
+  const slices = safeRows.map((r, idx) => {
+    const value = Number(r.value);
+    const angle = total > 0 ? (value / total) * 360 : 0;
+    const endAngle = startAngle + angle;
+    const start = toXY(startAngle, 42);
+    const end = toXY(endAngle, 42);
+    const largeArc = angle > 180 ? 1 : 0;
+    const d = `M 50 50 L ${start.x.toFixed(3)} ${start.y.toFixed(3)} A 42 42 0 ${largeArc} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)} Z`;
+    const fill = colors[idx % colors.length];
+    const slice = { d, fill, label: r.label, value };
+    startAngle = endAngle;
+    return slice;
+  });
+
+  return (
+    <div className="chart-card pie-card">
+      <div className="chart-title">{title}</div>
+      {total <= 0 ? (
+        <div className="mini-empty">No data yet</div>
+      ) : (
+        <div className="pie-layout">
+          <svg className="pie-svg" viewBox="0 0 100 100" aria-hidden="true">
+            {slices.map((s, i) => (
+              <path key={i} d={s.d} fill={s.fill} />
+            ))}
+            <circle cx="50" cy="50" r="25" fill="#ffffff" />
+          </svg>
+          <div className="pie-legend">
+            {slices.map((s, i) => (
+              <div key={i} className="pie-legend-row">
+                <span className="pie-dot" style={{ backgroundColor: s.fill }} />
+                <span className="pie-name">{s.label}</span>
+                <span className="pie-value">{Math.round((s.value / total) * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MiniListCard = ({ title, rows, emptyText, valueSuffix }) => {
+  const safe = Array.isArray(rows) ? rows : [];
+  return (
+    <div className="chart-card">
+      <div className="chart-title">{title}</div>
+      {safe.length === 0 ? (
+        <div className="mini-empty">{emptyText}</div>
+      ) : (
+        <div className="mini-list">
+          {safe.map((r) => (
+            <div key={r.productsId ?? r.productName ?? r.label} className="mini-list-row">
+              {r.image ? <img src={apiImageUrl(r.image)} alt={r.productName || r.label || "item"} className="mini-list-image" /> : null}
+              <div className="mini-list-main">
+                <div className="mini-list-name">{r.productName || r.label}</div>
+              </div>
+              <div className="mini-list-value">
+                {typeof r.value === "number" ? r.value : r.soldQuantity ?? r.quantity ?? r.totalOrders ?? 0}
+                {valueSuffix || ""}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AccountModal = ({ show, onClose, onFund, currentBalance }) => {
   const [amount, setAmount] = useState("");
 
@@ -221,6 +327,10 @@ const Home = () => {
   const [analytics, setAnalytics] = useState(null);
   const [analyticsError, setAnalyticsError] = useState("");
   const [analyticsSeries, setAnalyticsSeries] = useState([]);
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
+  const [productsByCategory, setProductsByCategory] = useState([]);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [peakOrderHours, setPeakOrderHours] = useState([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiRunId, setConfettiRunId] = useState(0);
   const confettiTimeoutRef = useRef(null);
@@ -244,21 +354,40 @@ const Home = () => {
       const token = localStorage.getItem("token");
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [summaryRes, byDayRes] = await Promise.all([
+      const [summaryRes, byDayRes, topRes, byCategoryRes, lowStockRes, peakRes] = await Promise.all([
         fetch("http://localhost:7270/api/Analytics/Summary", { headers }),
         fetch("http://localhost:7270/api/Analytics/OrdersByDay?days=14", { headers }),
+        fetch("http://localhost:7270/api/Analytics/TopSellingProducts?take=5", { headers }),
+        fetch("http://localhost:7270/api/Analytics/ProductsByCategory", { headers }),
+        fetch("http://localhost:7270/api/Analytics/LowStock?threshold=5&take=6", { headers }),
+        fetch("http://localhost:7270/api/Analytics/PeakOrderTime?days=30", { headers }),
       ]);
 
-      if (!summaryRes.ok || !byDayRes.ok) {
+      if (!summaryRes.ok || !byDayRes.ok || !topRes.ok || !byCategoryRes.ok || !lowStockRes.ok || !peakRes.ok) {
         throw new Error("Failed to fetch analytics");
       }
 
-      const [summary, byDay] = await Promise.all([summaryRes.json(), byDayRes.json()]);
+      const [summary, byDay, top, byCategory, lowStock, peak] = await Promise.all([
+        summaryRes.json(),
+        byDayRes.json(),
+        topRes.json(),
+        byCategoryRes.json(),
+        lowStockRes.json(),
+        peakRes.json(),
+      ]);
       setAnalytics(summary);
       setAnalyticsSeries(Array.isArray(byDay) ? byDay : []);
+      setTopSellingProducts(Array.isArray(top) ? top : []);
+      setProductsByCategory(Array.isArray(byCategory) ? byCategory : []);
+      setLowStockProducts(Array.isArray(lowStock) ? lowStock : []);
+      setPeakOrderHours(Array.isArray(peak) ? peak : []);
     } catch (err) {
       setAnalytics(null);
       setAnalyticsSeries([]);
+      setTopSellingProducts([]);
+      setProductsByCategory([]);
+      setLowStockProducts([]);
+      setPeakOrderHours([]);
       setAnalyticsError(err?.message || "Failed to fetch analytics");
     }
   };
@@ -591,7 +720,7 @@ const clearCart = () => {
         {roleId === "2" && (
           <>
             <button onClick={() => navigate("/addProduct")}>Product Management</button>
-            <button onClick={() => navigate("/check-products")}>Check Products</button>
+            <button onClick={() => navigate("/check-products")}>Menu</button>
             <button onClick={fetchOrders}>Order Management</button>
             <button onClick={() => navigate("/usermanagement")}>User Management</button>
           </>
@@ -743,6 +872,31 @@ const clearCart = () => {
               valueKey="totalRevenue"
               color="#8ac926"
               title="Revenue (last 14 days)"
+            />
+          </div>
+
+          <div className="dashboard-widgets">
+            <MiniListCard
+              title="Top selling products"
+              rows={topSellingProducts.map((p) => ({ ...p, value: Number(p.soldQuantity ?? 0) }))}
+              emptyText="No sales yet"
+            />
+            <PieChartCard
+              title="Products by category"
+              rows={productsByCategory.map((c) => ({ label: c.categoryName, value: Number(c.soldQuantity ?? 0) }))}
+            />
+            <MiniListCard
+              title="Low stock"
+              rows={lowStockProducts.map((p) => ({ ...p, value: Number(p.quantity ?? 0) }))}
+              emptyText="No low stock items"
+              valueSuffix=" left"
+            />
+            <MiniBarChart
+              title="Peak order time"
+              points={peakOrderHours}
+              valueKey="totalOrders"
+              color="#ff595e"
+              footerLeft="Last 30 days"
             />
           </div>
         </div>
