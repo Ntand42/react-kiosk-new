@@ -210,7 +210,12 @@ const Home = () => {
 
   
   try {
-    const res = await fetch(`http://localhost:7270/api/Order/User/${userId}`, {
+    const isSuperUser = roleId === "2";
+    const url = isSuperUser
+      ? "http://localhost:7270/api/Order/All"
+      : `http://localhost:7270/api/Order/User/${userId}`;
+
+    const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -518,14 +523,15 @@ const clearCart = () => {
         {roleId === "2" && (
           <>
             <button onClick={() => navigate("/addProduct")}>Product Management</button>
+            <button onClick={fetchOrders}>Order Management</button>
             <button onClick={() => navigate("/usermanagement")}>User Management</button>
           </>
         )}
-        <button onClick={fetchOrders}>Orders</button>
         <button className="nav-button cart-button" onClick={() => setShowCartModal(true)}>
           🛒 Cart
           {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
         </button>
+        <button onClick={fetchOrders}>Orders</button>
         <button onClick={() => setShowAccountModal(true)} className="nav-button">
           Wallet (
           {typeof walletBalance === "number" && !isNaN(walletBalance)
@@ -584,6 +590,9 @@ const clearCart = () => {
           .map((order) => (
             <div key={order.ordersId} className="order-entry">
               <p><strong>Order ID:</strong> {order.ordersId}</p>
+              {roleId === "2" && (
+                <p><strong>User:</strong> {order.userName ?? order.usersId}</p>
+              )}
               <p><strong>Total:</strong> R{order.totalAmount}</p>
               <p><strong>Method:</strong> {order.deliveryMethod}</p>
               <p><strong>Date:</strong> {new Date(order.orderDate).toLocaleString()}</p>
